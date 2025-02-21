@@ -1,6 +1,7 @@
-from server import app 
+from server import app
+from flask import render_template
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return "Nihao shijie"
+    return render_template('index.html', title='Nihao shijie')
