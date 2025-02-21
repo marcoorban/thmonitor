@@ -8,6 +8,6 @@ app = Flask(__name__)
 app.config.from_object(Config)
 # create a database instance to interact with the database
 db = SQLAlchemy(app) 
-migrate = Migreate(app, db)
+migrate = Migrate(app, db)
 
 from server import routes, models
