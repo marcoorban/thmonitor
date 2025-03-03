@@ -25,3 +25,6 @@ class Reading(models.Model):
     pressure = models.FloatField(blank=True, default=1000.0)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     time = models.DateTimeField()
+
+    def __str__(self):
+        return f"{self.heat_index} from {self.sensor} @ {self.time}"
