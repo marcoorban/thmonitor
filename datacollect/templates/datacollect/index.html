@@ -1,9 +1,27 @@
-{% if sensor_list %}
-<ul>
-  {% for sensor in sensor_list %}
-  <li><a href="/sensor/{{ sensor.id }}">{{ sensor.name }}</a></li>
-  {% endfor %}
-</ul>
-{% else %}
-<p> There are no sensors for some mysterious reason.</p>
-{% endif %}
+{% extends "datacollect/base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ block.super }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h1> Index </h1>
+  <p class="important">
+    Welcome to the temp-humi sensor page of
+    La Casa
+  </p>
+
+  {% if sensor_list %}
+  <ul>
+    {% for sensor in sensor_list %}
+    <li><a href="/sensor/{{ sensor.id }}">{{ sensor.name }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p> There are no sensors for some mysterious reason.</p>
+  {% endif %}
+
+{% endblock %}
