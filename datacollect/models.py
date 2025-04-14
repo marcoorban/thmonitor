@@ -27,4 +27,4 @@ class Reading(models.Model):
     time = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.heat_index} from {self.sensor} @ {self.time}"
+        return f"T:{self.temperature}, H:{self.humidity}, FL:{self.heat_index}\n From {self.sensor} @ {self.time}"
