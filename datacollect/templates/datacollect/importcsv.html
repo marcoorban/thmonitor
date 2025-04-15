@@ -10,8 +10,8 @@
 {% block content %}
   <h1> Import CSV </h1>
   <form method="post">
-    <label for="csv-file">Select file: </label>
-    <input id="csv-file" type="file" name="csv-file">
-    <input type="submit">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
 
 {% endblock %}
