@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from .models import Sensor, Reading
 from .forms import ImportCSVForm
+from .scripts.data import save_reading
 
 def index(request):
     """ View function for index / home page"""
@@ -15,7 +16,10 @@ def index(request):
 
 
 def monitor(request):
-    """ Page that shows temperature and humidity data from sensors"""
+    """ This view is where the sensors are posting their readings.
+    It takes the data given by a sensor and saves it as a reading in
+    the database"""
+
     r = request.GET
     temp = float(r["temperature"].strip())
     humi = float(r["humidity"].strip())
@@ -28,19 +32,8 @@ def monitor(request):
     timestr = r["time"]
     time = datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S.%f")
 
-    s = Sensor.objects.get(name=sensorname)
+    save_reading(temp, humi, hi, sensorname, pres) 
 
-    print(time)
-
-    reading = Reading(
-        temperature=temp,
-        humidity=humi,
-        heat_index=hi,
-        pressure=pres,
-        sensor=s,
-        time=time,
-    )
-    print(reading)
     return HttpResponse("Got data")
 
 
@@ -70,9 +63,15 @@ def import_csv(request):
         form = ImportCSVForm(request.POST)
         if form.is_valid():
             # Process the data in form.cleaned_data as required
-            # ...
+            upfile = form.csvfile
+            # Make sure that the file is indeed a csv
+            if not is_csv(upfile):
+              pass
             # redirect to a new URL:
             return HttpResponseRedirect("/thanks/")
+        else:
+            # Redirect to form site, but show an error.
+            pass
     # If get request, just show the form
     else:
        form = ImportCSVForm()

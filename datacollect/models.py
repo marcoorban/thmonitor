@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 # Create your models here.
 
@@ -27,4 +28,6 @@ class Reading(models.Model):
     time = models.DateTimeField()
 
     def __str__(self):
-        return f"T:{self.temperature}, H:{self.humidity}, FL:{self.heat_index}\n From {self.sensor} @ {self.time}"
+        return f"""{self.sensor} @ {self.time}\n
+        T:{self.temperature}, H:{self.humidity},
+        FL:{self.heat_index}\n"""
