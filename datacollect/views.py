@@ -6,7 +6,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from .models import Sensor, Reading
 from .forms import ImportCSVForm
-from .scripts.data import save_reading
+from .scripts.data import create_reading
+
+READINGS = {"Sensehat":None} # This list will contain the latest readings for each sensor
 
 def index(request):
     """ View function for index / home page"""
@@ -19,22 +21,13 @@ def monitor(request):
     """ This view is where the sensors are posting their readings.
     It takes the data given by a sensor and saves it as a reading in
     the database"""
-    r = request.GET
-    temp = float(r["temperature"].strip())
-    humi = float(r["humidity"].strip())
-    hi = float(r["heat_index"].strip())
-    try:
-        pres = float(r["pressure"].strip())
-    except ValueError:
-        pres = 1000.0
-    sensorname = r["sensor"].strip()
 
-    return HttpResponse("Got data")
-
+    return render(request, "datacollect/monitor.html", {"readings":READINGS})
 
 def post_data(request):
     """ This function enables sensors to post their data to the database """
-    r = request.POST
+    r = request.GET
+    # parse the arguments sent by the sensor
     temp = float(r["temperature"].strip())
     humi = float(r["humidity"].strip())
     hi = float(r["heat_index"].strip())
@@ -43,9 +36,17 @@ def post_data(request):
     except ValueError:
         pres = 1000.0
     sensorname = r["sensor"].strip()
-
-    save_reading(temp, humi, hi, sensorname, pres) 
-    return request
+    # Create (but not save) the reading from the arguments
+    reading = create_reading(temp, humi, hi, sensorname, pres) 
+    # Update the global READINGS dictionary of sensor readings.
+    READINGS[sensorname] = reading
+    print(READINGS)
+        # Save the reading every five minutes only
+    mins = datetime.now().minute
+    if mins % 5 == 0:
+        reading.save()
+        print("Reading saved!")
+    return HttpResponse("Got data, thanks!")
 
 
 def room(request):

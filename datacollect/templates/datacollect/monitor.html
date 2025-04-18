@@ -1,0 +1,21 @@
+{% extends "datacollect/base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ block.super }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+
+{% block content %}
+{% for sensor, reading in readings.items %}
+<h2>{{reading.sensor}}</h2>
+<ul>
+  <li>Temperature: {{reading.temperature}}&deg;C</li>
+  <li>Humidity: {{reading.humidity}}%</li>
+  <li>Feels Like: {{reading.heat_index}}&deg;C</li>
+  <li>Pressure: {{reading.pressure}}</li>
+  <li>Last Updated: {{reading.time}}</li>
+</ul>
+{% endfor %}
+{% endblock %}
