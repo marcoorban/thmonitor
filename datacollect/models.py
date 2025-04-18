@@ -1,12 +1,12 @@
 from django.db import models
 from datetime import datetime
+import pytz
 
-# Create your models here.
+taipei_tz = pytz.timezone("Asia/Taipei")
 
 
-class Room(models.Model):
+class Room(models.Model):    
     name = models.CharField(max_length=32)
-
     def __str__(self):
         return self.name
 
@@ -28,6 +28,7 @@ class Reading(models.Model):
     time = models.DateTimeField()
 
     def __str__(self):
-        return f"""{self.sensor} @ {self.time}\n
+        time = self.time.astimezone(taipei_tz).strftime('%Y-%m-%d %H:%M:%S')
+        return f"""{self.sensor} @ {time}\n
         T:{self.temperature}, H:{self.humidity},
         FL:{self.heat_index}\n"""
