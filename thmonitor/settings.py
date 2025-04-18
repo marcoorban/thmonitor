@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-v9q9$r2eq-(ho()udic(vs&0bddl*$t3_tkm^31+oj$uy006lf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["elcincopi", "127.0.0.1"]
 
 
 # Application definition
@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "datacollect.scripts.data.TimezoneMiddleware",
 ]
 
 ROOT_URLCONF = "thmonitor.urls"
@@ -106,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Taipei"
 
 USE_I18N = True
 
