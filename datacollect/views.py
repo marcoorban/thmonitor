@@ -19,7 +19,6 @@ def monitor(request):
     """ This view is where the sensors are posting their readings.
     It takes the data given by a sensor and saves it as a reading in
     the database"""
-
     r = request.GET
     temp = float(r["temperature"].strip())
     humi = float(r["humidity"].strip())
@@ -29,16 +28,23 @@ def monitor(request):
     except ValueError:
         pres = 1000.0
     sensorname = r["sensor"].strip()
-    timestr = r["time"]
-    time = datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S.%f")
-
-    save_reading(temp, humi, hi, sensorname, pres) 
 
     return HttpResponse("Got data")
 
 
 def post_data(request):
     """ This function enables sensors to post their data to the database """
+    r = request.POST
+    temp = float(r["temperature"].strip())
+    humi = float(r["humidity"].strip())
+    hi = float(r["heat_index"].strip())
+    try:
+        pres = float(r["pressure"].strip())
+    except ValueError:
+        pres = 1000.0
+    sensorname = r["sensor"].strip()
+
+    save_reading(temp, humi, hi, sensorname, pres) 
     return request
 
 
