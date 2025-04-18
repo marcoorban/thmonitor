@@ -10,7 +10,7 @@ import zoneinfo
 
 taipei_tz = pytz.timezone("Asia/Taipei")
 
-def save_reading(temp, humi, hi, sensorname, pressure=1000.0):
+def create_reading(temp, humi, hi, sensorname, pressure=1000.0):
     sensor = Sensor.objects.get(name=sensorname)
     reading = Reading(temperature=temp,
             humidity=humi,
@@ -19,7 +19,6 @@ def save_reading(temp, humi, hi, sensorname, pressure=1000.0):
             sensor=sensor,
             time=datetime.now(taipei_tz))
     print(reading)
-    reading.save()
     return reading
 
 class TimezoneMiddleware:
