@@ -5,6 +5,12 @@
   <style type="text/css">
     .important { color: #336699; }
   </style>
+  <script>
+    function autoRefresh() {
+      window.location = window.location.href;
+    }
+    setInterval('autoRefresh()', 60000);
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -14,7 +20,7 @@
   <li>Temperature: {{reading.temperature}}&deg;C</li>
   <li>Humidity: {{reading.humidity}}%</li>
   <li>Feels Like: {{reading.heat_index}}&deg;C</li>
-  <li>Pressure: {{reading.pressure}}</li>
+  <li>Pressure: {{reading.pressure}} mbar</li>
   <li>Last Updated: {{reading.time}}</li>
 </ul>
 {% endfor %}

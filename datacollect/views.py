@@ -16,6 +16,11 @@ def index(request):
     context = {"sensor_list": sensor_list}
     return render(request, "datacollect/index.html", context)
 
+def test(request):
+    """ This is just a test view that sends an HTTP response to test
+    if clients are connecting properly """
+    content = "You have successfully connected, punk!"
+    return HttpResponse(content=content, status=200, content_type="text/html")
 
 def monitor(request):
     """ This view is where the sensors are posting their readings.

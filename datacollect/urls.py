@@ -9,4 +9,5 @@ urlpatterns = [
     path("room/<int:room_id>/", views.room, name="room"),
     path("sensor/<int:sensor_id>/", views.sensor, name="sensor"),
     path("import", views.import_csv, name="import"),
+    path("test", views.test, name="test"),
 ]
