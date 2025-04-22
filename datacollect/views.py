@@ -38,7 +38,7 @@ def post_data(request):
     hi = float(r["heat_index"].strip())
     try:
         pres = float(r["pressure"].strip())
-    except ValueError:
+    except:
         pres = 1000.0
     sensorname = r["sensor"].strip()
     # Create (but not save) the reading from the arguments
