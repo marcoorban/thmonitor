@@ -67,7 +67,7 @@ def post_data(request):
         data_string = ','.join(data)
         add_to_cache(sensorname, data_string)
     # write data to cache every thirty minutes
-    if min_now % 30 == 0:
+    if min_now % 30 == 0 or min_now == 59:
         write_cache(sensorname)
 
     return HttpResponse("Thanks for the data!")
