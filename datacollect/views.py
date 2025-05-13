@@ -47,7 +47,7 @@ def post_data(request):
     sensorname = r["sensor"].strip()
 
     sensor = Sensor.objects.get(name=sensorname)
-    
+
     # create a reading object
     this_reading = Reading(temperature=temp,
                           humidity=humi,
@@ -60,8 +60,8 @@ def post_data(request):
 
     # Decide whether to add and write to cache depending on the clock time.
     min_now = now.minute
-    # add data to cache every five minutes
-    if min_now % 5 == 0:
+    # add data to cache every three minutes
+    if min_now % 3 == 0:
         now_string = now.strftime("%Y-%m-%dT%H:%M:%S+08:00")
         data = [now_string, temp, humi, hi, pres]
         data_string = ','.join(data)
@@ -83,8 +83,8 @@ def write_cache(sensorname):
     month = now.month
     day = now.day
 
-    filename_path = Path(PARENT, "data", sensorname, str(year), str(month))
-    filename = Path(filename_path, str(day) + ".csv")
+    filename_path = Path(PARENT, "data", sensorname, str(year), str(month).zfill(2))
+    filename = Path(filename_path, str(day).zfill(2) + ".csv")
 
     if not filename_path.exists():
         # Create the directory
@@ -92,7 +92,7 @@ def write_cache(sensorname):
     if not filename.exists():
         # Create the file
         with open(filename, "w") as f:
-            f.write("date, temperature, humidity, heat_index, pressure\n")
+            f.write("date,temperature,humidity,heat_index,pressure\n")
     with open(filename, "a") as f:
         for line in cache[sensorname]:
             f.write(line + "\n")   
