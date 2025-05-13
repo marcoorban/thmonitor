@@ -7,11 +7,11 @@ from django.urls import reverse
 from .models import Sensor, Reading
 from .forms import ImportCSVForm
 from .scripts.data import create_reading
+from pathlib import Path
 
-READINGS = {"Sensehat":None} # This list will contain the latest readings for each sensor
-WRITE_FREQ = 15
-batch_data = {"Sensehat":None, "DHT11_1":None}
-prev_min = datetime.datetime.now().minute
+cur_readings = {"Sensehat":[], "DHT11_1":[]} # This list will contain the latest readings for each sensor
+cache = {"Sensehat":[], "DHT11_1":[]}
+PARENT = Path(__file__).parent.resolve()
 
 def index(request):
     """ View function for index / home page"""
@@ -30,85 +30,74 @@ def monitor(request):
     It takes the data given by a sensor and saves it as a reading in
     the database"""
 
-    return render(request, "datacollect/monitor.html", {"readings":READINGS})
-
-def post_data_deprecated(request):
-    """ This function enables sensors to post their data to the database """
-    r = request.GET
-    # parse the arguments sent by the sensor
-    temp = float(r["temperature"].strip())
-    humi = float(r["humidity"].strip())
-    hi = float(r["heat_index"].strip())
-    try:
-        pres = float(r["pressure"].strip())
-    except:
-        pres = 1000.0
-    sensorname = r["sensor"].strip()
-    # Create (but not save) the reading from the arguments
-    reading = create_reading(temp, humi, hi, sensorname, pres) 
-    # Update the global READINGS dictionary of sensor readings.
-    READINGS[sensorname] = reading
-    print(READINGS)
-        # Save the reading every five minutes only
-    mins = datetime.now().minute
-    if mins % 5 == 0:
-        reading.save()
-        print("Reading saved!")
-    return HttpResponse("Got data, thanks!")
+    return render(request, "datacollect/monitor.html", {"readings":cur_readings})
 
 def post_data(request):
     """ This function writes data from sensors to database """
-
-    now = datetime.datetime.now()
-
     r = request.GET
+    now = datetime.now()
     # parse the arguments sent by the sensor
-    temp = float(r["temperature"].strip())
-    humi = float(r["humidity"].strip())
-    hi = float(r["heat_index"].strip())
+    temp = r["temperature"].strip()
+    humi = r["humidity"].strip()
+    hi = r["heat_index"].strip()
     try:
-        pres = float(r["pressure"].strip())
+        pres = r["pressure"].strip()
     except:
-        pres = 1000.0
+        pres = "1000.0"
     sensorname = r["sensor"].strip()
 
-    # Create (but not save) the reading from the arguments
-    reading = create_reading(temp, humi, hi, sensorname, pres) 
-    # Update the global READINGS dictionary of sensor readings.
-    READINGS[sensorname] = reading
-    print(READINGS)
-
-    # Data will be added to batch data only once every minute:
-    min_now = now.minute
-    if min_now != prev_min:
-        # The data will be converted into a comma-separated string, and added to batch for 
-        # storage. The data will not be written continuously to the file and will be cached
-        # as to no create too many accesses to the file.
-        data = [now, temp, humi, hi, pres]
-        data_string = ','.join(data)
-        batch_data[sensorname].append(data_string)
-        prev_min = min_now
+    sensor = Sensor.objects.get(name=sensorname)
     
-    # Data will be written once it reaches a WRITE_FREQ threshold
-    if len(batch_data) > WRITE_FREQ:
-        # Access the directory first. If directory does not exist, create it
-        year = now.year
-        month = now.month
-        day = now.day
+    # create a reading object
+    this_reading = Reading(temperature=temp,
+                          humidity=humi,
+                          heat_index=hi,
+                          pressure=pres,
+                          sensor=sensor,
+                          time=now)
+    global cur_readings
+    cur_readings[sensorname] = this_reading
 
-        filename_path = Path(".." , data, sensorname, year, month)
-        filename = Path(filename_path, day + ".csv")
+    # Decide whether to add and write to cache depending on the clock time.
+    min_now = now.minute
+    # add data to cache every five minutes
+    if min_now % 5 == 0:
+        now_string = now.strftime("%Y-%m-%dT%H:%M:%S+08:00")
+        data = [now_string, temp, humi, hi, pres]
+        data_string = ','.join(data)
+        add_to_cache(sensorname, data_string)
+    # write data to cache every thirty minutes
+    if min_now % 30 == 0:
+        write_cache(sensorname)
 
-        if not filename_path.exists():
-            # Create the directory
-            filename_path.mkdir(parents=True, exist_ok=True)
-        with open(filename, "a") as f:
-            for line in batch_data[sensorname]:
-                f.write(line + "\n")
-            batch_data = []
+    return HttpResponse("Thanks for the data!")
 
-    return HttpResponse("Got data, thanks!")
+def add_to_cache(sensorname, data):
+    global cache
+    cache[sensorname].append(data)
 
+def write_cache(sensorname):
+    global cache
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    day = now.day
+
+    filename_path = Path(PARENT, "data", sensorname, str(year), str(month))
+    filename = Path(filename_path, str(day) + ".csv")
+
+    if not filename_path.exists():
+        # Create the directory
+        filename_path.mkdir(parents=True, exist_ok=True)
+    if not filename.exists():
+        # Create the file
+        with open(filename, "w") as f:
+            f.write("date, temperature, humidity, heat_index, pressure\n")
+    with open(filename, "a") as f:
+        for line in cache[sensorname]:
+            f.write(line + "\n")   
+    # delete the cache to start adding data to it
+    cache[sensorname] = []
 
 def room(request):
     """ Shows view with list of rooms and the average sensor readings"""
